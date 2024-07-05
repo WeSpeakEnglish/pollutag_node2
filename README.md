@@ -45,5 +45,5 @@ function Encoder(measurements, port) {
     else return [0];
 }
 ```
-Before compile please edit comissioning in CubeMX (.ioc)
+Before compile please edit comissioning in CubeMX (.ioc). Network ID may be left 0, if you are connecting to any first public network avaliable (may be usiful if you planning to transfer to a different network lately, then you may the nodes commisionings set on other's network console , reset the node and delete commisionings on old networks console, following the second reset of the node)
 ![to compile please edit comissioning first](https://github.com/WeSpeakEnglish/pollutag_node2/blob/main/commissioning.png)
