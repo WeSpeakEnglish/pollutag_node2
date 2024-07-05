@@ -1,3 +1,4 @@
+![the Node2](https://github.com/WeSpeakEnglish/pollutag_node2/blob/main/node2.png)
 # Pollutag Node2
 The LoraWAN node for air quatity monitoring based on STM32WLE and SEN54 Sensirion sensor
 868 Mhz LoRaWAN node for continuous air quality monitoring. The node operates autonomously and support remote commands via downlinks.
