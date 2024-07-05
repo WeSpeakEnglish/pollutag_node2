@@ -45,3 +45,5 @@ function Encoder(measurements, port) {
     else return [0];
 }
 ```
+Before compile please edit comissioning in CubeMX (.ioc)
+![to compile please edit comissioning first](https://github.com/WeSpeakEnglish/pollutag_node2/blob/main/commissioning.png)
