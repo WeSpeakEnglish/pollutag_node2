@@ -11,7 +11,13 @@ SEN54 connected via I2C2 interface.
 7. More than 2 weeks work autonomity from fully charged 3500mA  Li-Ion battery
 8. Ideal for sensor.community integration over LoRaWAN IoT, like TTN and Helium, no internet connection from your side needed!
 9. Full fledged with routed test points - easy to solder - easy to add functionality (inputs, outputs, interfaces etc.)
-        
+
+## Downlink commands supported
+1. Reset the device via sending downlink on Port2: FF FF FF FF FF FF
+2. Set transmit period (in milliseconds) via downlink on Port2: 01 00 XX XX XX XX (XX XX XX XX - milliseconds coded in hex (big endian), ex. for 5 minutes = 300,000 ms = 00 04 93 E0)
+3. Set measuring period (in minutes) via downlink as for now provided with LED_ON command in one 2-bytes downlink message on Port2: 01 XX - LED ON and  measuring period = XX minutes, 00 XX - LED is OFF and  measuring period = XX minutes
+   This LED enchanced with FET transictor, so you may connect some load to be switched ON/OFF (see the schematic in PCB folder)  
+         
 The node uplink data packet containing 13 payload bytes with following data - PM1 concenthation, PM2.5 concentration, PM10 concentration, temperature,
 humidity, volatile organic copounds index (VOC), battery level related to volts, status of LED output. 
 Decoder for payload on server side (uplink):
