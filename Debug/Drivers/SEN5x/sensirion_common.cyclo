@@ -1,0 +1,11 @@
+../Drivers/SEN5x/sensirion_common.c:35:10:sensirion_common_bytes_to_uint16_t	1
+../Drivers/SEN5x/sensirion_common.c:39:10:sensirion_common_bytes_to_uint32_t	1
+../Drivers/SEN5x/sensirion_common.c:44:9:sensirion_common_bytes_to_int16_t	1
+../Drivers/SEN5x/sensirion_common.c:48:9:sensirion_common_bytes_to_int32_t	1
+../Drivers/SEN5x/sensirion_common.c:52:7:sensirion_common_bytes_to_float	1
+../Drivers/SEN5x/sensirion_common.c:62:6:sensirion_common_uint32_t_to_bytes	1
+../Drivers/SEN5x/sensirion_common.c:69:6:sensirion_common_uint16_t_to_bytes	1
+../Drivers/SEN5x/sensirion_common.c:74:6:sensirion_common_int32_t_to_bytes	1
+../Drivers/SEN5x/sensirion_common.c:81:6:sensirion_common_int16_t_to_bytes	1
+../Drivers/SEN5x/sensirion_common.c:86:6:sensirion_common_float_to_bytes	1
+../Drivers/SEN5x/sensirion_common.c:95:6:sensirion_common_copy_bytes	2
