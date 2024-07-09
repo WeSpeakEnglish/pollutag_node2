@@ -1,2 +1,0 @@
-../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_iwdg.c:170:19:HAL_IWDG_Init	6
-../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_iwdg.c:257:19:HAL_IWDG_Refresh	1

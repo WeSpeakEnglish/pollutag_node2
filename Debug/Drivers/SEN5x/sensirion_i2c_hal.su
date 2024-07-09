@@ -1,5 +1,0 @@
-../Drivers/SEN5x/sensirion_i2c_hal.c:48:6:sensirion_i2c_hal_init	4	static
-../Drivers/SEN5x/sensirion_i2c_hal.c:55:6:sensirion_i2c_hal_free	4	static
-../Drivers/SEN5x/sensirion_i2c_hal.c:68:8:sensirion_i2c_hal_read	24	static
-../Drivers/SEN5x/sensirion_i2c_hal.c:84:8:sensirion_i2c_hal_write	24	static
-../Drivers/SEN5x/sensirion_i2c_hal.c:96:6:sensirion_i2c_hal_sleep_usec	24	static
