@@ -50,6 +50,10 @@ Before compile please edit comissioning in CubeMX (.ioc). Network ID may be left
 ![to compile please edit comissioning first](https://github.com/WeSpeakEnglish/pollutag_node2/blob/main/commissioning.png)
 
 Hackaday project: [LINK](https://hackaday.io/project/198348-pollutagnode2-air-quality-monitor-lorawan)
+
 OSHWLab STD project: [LINK](https://oshwlab.com/pinelab/pollutagnode2-lorawan-node-air-quality-monitor)
+
 OSHWLab PRO poject: [LINK](https://oshwlab.com/pinelab/pollutag2)
+
 Pollutants.eu: [LINK](https://pollutants.eu/index.php/component/search/?searchword=pollutag&searchphrase=all&Itemid=121)
+
