@@ -48,3 +48,8 @@ function Encoder(measurements, port) {
 ```
 Before compile please edit comissioning in CubeMX (.ioc). Network ID may be left 0, if you are connecting to any first public network avaliable (may be useful if you planning to transfer to a different LoRaWAN network lately, then you may set the nodes commisionings on other's network console, reset the node and delete commisionings on old networks console, following the second reset of the node)
 ![to compile please edit comissioning first](https://github.com/WeSpeakEnglish/pollutag_node2/blob/main/commissioning.png)
+
+Hackaday project: [LINK](https://hackaday.io/project/198348-pollutagnode2-air-quality-monitor-lorawan)
+OSHWLab STD project: [LINK](https://oshwlab.com/pinelab/pollutagnode2-lorawan-node-air-quality-monitor)
+OSHWLab PRO poject: [LINK](https://oshwlab.com/pinelab/pollutag2)
+Pollutants.eu: [LINK](https://pollutants.eu/index.php/component/search/?searchword=pollutag&searchphrase=all&Itemid=121)
