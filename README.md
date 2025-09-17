@@ -46,6 +46,12 @@ function Encoder(measurements, port) {
     else return [0];
 }
 ```
+## Preparation
+Originally LORA-E5 (Wio)  modules came pre-programmed with AT-command enabled stack, working like a LoRaWAN modem.
+To use the core MCU for this node it is needed first to erase the chip and prepare the project for proper comissioning. You may use commissioning identificators already pre-programmed into the chip by Seeed studio, or generate the new via TTN/ Helium console.
+To erase chip connect it via ST-LINK **under reset** (you need to short RESET pin (J1, pin 5) of the MCU to the ground before you press "Connect" button in STM32CubeProgrammer).
+![to compile please edit comissioning first](https://github.com/WeSpeakEnglish/images/blob/main/connect_under_reset_pollutagNode.png)
+
 Before compile please edit comissioning in CubeMX (.ioc). Network ID may be left 0, if you are connecting to any first public network avaliable (may be useful if you planning to transfer to a different LoRaWAN network lately, then you may set the nodes commisionings on other's network console, reset the node and delete commisionings on old networks console, following the second reset of the node)
 ![to compile please edit comissioning first](https://github.com/WeSpeakEnglish/pollutag_node2/blob/main/commissioning.png)
 
