@@ -52,7 +52,13 @@ To use the core MCU for this node it is needed first to erase the chip and prepa
 To erase chip connect it via ST-LINK **under reset** (you need to short RESET pin (J1, pin 5) of the MCU to the ground before you press "Connect" button in STM32CubeProgrammer).
 ![to compile please edit comissioning first](https://github.com/WeSpeakEnglish/images/blob/main/connect_under_reset_pollutagNode.png)
 
-Before compile please edit comissioning in CubeMX (.ioc). Network ID may be left 0, if you are connecting to any first public network avaliable (may be useful if you planning to transfer to a different LoRaWAN network lately, then you may set the nodes commisionings on other's network console, reset the node and delete commisionings on old networks console, following the second reset of the node)
+After you successfully connected the MCU, it need to be reprogrammed Read protection Option Byte to AA (no protection)
+![to compile please edit comissioning first](https://github.com/WeSpeakEnglish/images/blob/main/rdp_byte_pollutagNode.png)
+
+After this process done. Chip may be cleaned sucessfully.
+![to compile please edit comissioning first](https://github.com/WeSpeakEnglish/images/blob/main/full_chip_erase_pollutagNode.png)
+
+Before compile the project please edit comissioning in CubeMX (.ioc). Network ID may be left 0, if you are connecting to any first public network avaliable (may be useful if you planning to transfer to a different LoRaWAN network lately, then you may set the nodes commisionings on other's network console, reset the node and delete commisionings on old networks console, following the second reset of the node)
 ![to compile please edit comissioning first](https://github.com/WeSpeakEnglish/pollutag_node2/blob/main/commissioning.png)
 
 Hackaday project: [LINK](https://hackaday.io/project/198348-pollutagnode2-air-quality-monitor-lorawan)
