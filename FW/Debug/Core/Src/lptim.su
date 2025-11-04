@@ -1,5 +1,0 @@
-../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_bus.h:914:22:LL_APB1_GRP1_EnableClock	24	static
-../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_bus.h:1018:22:LL_APB1_GRP1_DisableClock	16	static
-../Core/Src/lptim.c:30:6:MX_LPTIM1_Init	8	static
-../Core/Src/lptim.c:59:6:HAL_LPTIM_MspInit	72	static
-../Core/Src/lptim.c:90:6:HAL_LPTIM_MspDeInit	16	static

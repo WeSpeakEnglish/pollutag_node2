@@ -1,3 +1,0 @@
-../Middlewares/Third_Party/LoRaWAN/LmHandler/NvmDataMgmt.c:58:6:NvmDataMgmtEvent	1
-../Middlewares/Third_Party/LoRaWAN/LmHandler/NvmDataMgmt.c:65:9:NvmDataMgmtStoreBegin	1
-../Middlewares/Third_Party/LoRaWAN/LmHandler/NvmDataMgmt.c:84:9:NvmDataMgmtStoreEnd	1
