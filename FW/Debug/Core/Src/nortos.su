@@ -1,0 +1,8 @@
+../Core/Src/nortos.c:16:6:SimpleF1	4	static
+../Core/Src/nortos.c:20:7:F1_QueueIni	4	static
+../Core/Src/nortos.c:25:6:F1_push	16	static
+../Core/Src/nortos.c:32:9:F1_pull	16	static
+../Core/Src/nortos.c:44:7:SimpleF2	4	static
+../Core/Src/nortos.c:48:7:F2_QueueIni	4	static
+../Core/Src/nortos.c:53:6:F2_push	16	static
+../Core/Src/nortos.c:60:9:F2_pull	16	static
