@@ -1,20 +1,16 @@
 #include <Arduino.h>
 #include <RadioLib.h>
 #include <STM32RTC.h>
+#include <EEPROM.h>
 
 // --- RADIO / LoRaWAN setup ---
-
-// Use the internal STM32WL radio (inside LoRa‑E5 mini)
-STM32WLx radio = new STM32WLx_Module();
-
-// LoRaWAN node using EU868 band
+STM32WLx radio = new STM32WLx_Module();   // internal STM32WL radio
 LoRaWANNode node(&radio, &EU868);
 
 // RF switch pins for LoRa-E5 mini
 const uint32_t rfPins[] = { PA4, PA5, RADIOLIB_NC, RADIOLIB_NC, RADIOLIB_NC };
 
 // RF switch table mapping modes to pin states
-// Corrected for LoRa-E5 mini: RX on PA4=HIGH,PA5=LOW  TX on PA4=LOW,PA5=HIGH
 const Module::RfSwitchMode_t rfTable[] = {
   { STM32WLx::MODE_IDLE,  { LOW,  LOW } },
   { STM32WLx::MODE_RX,    { HIGH, LOW } },
@@ -22,120 +18,99 @@ const Module::RfSwitchMode_t rfTable[] = {
   END_OF_MODE_TABLE
 };
 
-// Transmission interval
-static const unsigned long TX_INTERVAL = 60000;  // 60 seconds
-unsigned long last_tx = 0;
-
 // RTC instance
 STM32RTC& rtc = STM32RTC::getInstance();
 
-// OTAA credentials — **replace these with your actual keys**
-uint64_t joinEUI = 0x0000000000000000ULL;
-uint64_t devEUI  = 0x0000000000000000ULL;
-uint8_t nwkKey[16] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-uint8_t appKey[16] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+// Transmission interval (ms)
+static const unsigned long TX_INTERVAL = 60000;
+unsigned long last_tx = 0;
 
-// Track join status
+// --- LoRaWAN OTAA credentials ---
+uint64_t joinEUI = 0x6081F9FDFF1A2E6BULL;
+uint64_t devEUI  = 0x6081F9AE72BB6E19ULL;
+uint8_t nwkKey[16] = { 0xC1, 0xC8, 0x5F, 0x97, 0x04, 0x6C, 0xF0, 0x78, 0x23, 0x2C, 0x0E, 0xDA, 0x2A, 0x5E, 0x9C, 0xC9 };
+uint8_t appKey[16] = { 0xC1, 0xC8, 0x5F, 0x97, 0x04, 0x6C, 0xF0, 0x78, 0x23, 0x2C, 0x0E, 0xDA, 0x2A, 0x5E, 0x9C, 0xC9 };
+
 bool isJoined = false;
 
-void setup() {
-  Serial.begin(115200);
-  while (!Serial) { ; }
+// --- EEPROM seed storage ---
+#define DEVNONCE_SEED_ADDR 0
 
-  Serial.println("LoRa‑E5 mini + RadioLib v7.x example");
+uint32_t loadNonceSeed() {
+  uint32_t val;
+  EEPROM.get(DEVNONCE_SEED_ADDR, val);
+  if (val == 0xFFFFFFFF || val == 0) val = 1;
+  return val;
+}
 
-  // Set RF switch table before initializing radio
-  radio.setRfSwitchTable(rfPins, rfTable);
+void saveNonceSeed(uint32_t val) {
+  EEPROM.put(DEVNONCE_SEED_ADDR, val);
+}
 
-  // Initialize the radio
-  int16_t err = radio.begin();
-  if (err != RADIOLIB_ERR_NONE) {
-    Serial.print("radio.begin() failed, code: ");
-    Serial.println(err);
-    while (true) {
-      delay(1000);
-    }
-  }
-  Serial.println("Radio initialized successfully");
-
-  // Set TCXO voltage (required for STM32WL)
-  // Typically 1.7V for most boards, check your board's documentation
-  err = radio.setTCXO(1.7);
-  if (err != RADIOLIB_ERR_NONE) {
-    Serial.print("setTCXO() failed, code: ");
-    Serial.println(err);
-  }
-
-  // Initialize RTC for timestamp
-  rtc.begin();
-  rtc.setTime(15, 30, 58);       // Hours, Minutes, Seconds
-  rtc.setDate(4, 11, 24);        // Day, Month, Year (Nov 4, 2024)
-
-  // Setup OTAA credentials
+// --- Join function ---
+bool joinNetwork() {
   Serial.println("Setting up OTAA credentials...");
-  err = node.beginOTAA(joinEUI, devEUI, nwkKey, appKey);
+  int16_t err = node.beginOTAA(joinEUI, devEUI, NULL, appKey);
   if (err != RADIOLIB_ERR_NONE) {
     Serial.print("OTAA setup failed, code: ");
     Serial.println(err);
-    while (true) {
-      delay(1000);
-    }
+    return false;
   }
-  Serial.println("OTAA credentials configured");
 
-  // Actually join the network - THIS IS THE MISSING STEP!
+  // Use a stored random seed to vary DevNonce internally
+  uint32_t seed = loadNonceSeed();
+  randomSeed(seed + millis());
+  saveNonceSeed(seed + 1);
+
+  Serial.print("Nonce seed: ");
+  Serial.println(seed);
+
   Serial.println("Attempting to join LoRaWAN network...");
-  Serial.println("This may take 10-30 seconds...");
   err = node.activateOTAA();
-  if (err != RADIOLIB_LORAWAN_NEW_SESSION) {
-    Serial.print("OTAA join failed, code: ");
+
+  if (err == RADIOLIB_LORAWAN_NEW_SESSION) {
+    Serial.println("✅ Successfully joined LoRaWAN network!");
+    return true;
+  } else {
+    Serial.print("❌ OTAA join failed, code: ");
     Serial.println(err);
-    Serial.println("Check your credentials and gateway coverage");
-    while (true) {
-      delay(1000);
-    }
+    return false;
   }
-  
-  isJoined = true;
-  Serial.println("Successfully joined LoRaWAN network!");
-  Serial.println("Starting periodic transmissions...");
 }
 
+// --- Send function ---
 void sendPacket() {
-  // Verify we're still joined
   if (!isJoined) {
-    Serial.println("Not joined to network!");
-    return;
+    Serial.println("Not joined — retrying OTAA...");
+    isJoined = joinNetwork();
+    if (!isJoined) {
+      Serial.println("Join failed again, waiting...");
+      return;
+    }
   }
 
   // Prepare payload with RTC timestamp
   char payload[32];
   snprintf(payload, sizeof(payload),
-           "%02d/%02d/%04d - %02d:%02d:%02d",
-           rtc.getMonth(), rtc.getDay(), 2000 + rtc.getYear(),
+           "%02d/%02d/%04d %02d:%02d:%02d",
+           rtc.getDay(), rtc.getMonth(), 2000 + rtc.getYear(),
            rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
 
   Serial.println("----------------------------------------");
   Serial.print("Sending uplink: ");
   Serial.println(payload);
 
-  // Use sendReceive: send uplink and wait for downlink
   uint8_t downBuf[64];
   size_t downLen = sizeof(downBuf);
   int16_t ret = node.sendReceive((uint8_t*)payload, strlen(payload),
-                                 10,         // FPort = 10
-                                 downBuf, &downLen,
-                                 false);     // unconfirmed uplink
+                                 10, downBuf, &downLen, false);
 
   if (ret == RADIOLIB_ERR_NONE) {
     Serial.println("✓ sendReceive succeeded");
     if (downLen > 0) {
-      Serial.print("Downlink received (");
+      Serial.print("Downlink (");
       Serial.print(downLen);
-      Serial.println(" bytes):");
-      Serial.print("  Data: ");
+      Serial.println(" bytes): ");
       for (size_t i = 0; i < downLen; i++) {
         if (downBuf[i] < 0x10) Serial.print("0");
         Serial.print(downBuf[i], HEX);
@@ -148,23 +123,60 @@ void sendPacket() {
   } else {
     Serial.print("✗ sendReceive failed, error: ");
     Serial.println(ret);
-    
-    // Handle specific errors
     if (ret == RADIOLIB_ERR_NETWORK_NOT_JOINED) {
-      Serial.println("Device not joined to network!");
+      Serial.println("Lost join state, retrying next loop...");
       isJoined = false;
     }
   }
+
   Serial.println("----------------------------------------");
 }
 
+// --- Setup ---
+void setup() {
+  Serial.begin(115200);
+  while (!Serial) {;}
+
+  Serial.println("LoRa-E5 mini + RadioLib OTAA example");
+
+  // Configure RF switch
+  radio.setRfSwitchTable(rfPins, rfTable);
+
+  int16_t err = radio.begin();
+  if (err != RADIOLIB_ERR_NONE) {
+    Serial.print("radio.begin() failed, code: ");
+    Serial.println(err);
+    while (true) delay(1000);
+  }
+  Serial.println("Radio initialized successfully");
+
+  err = radio.setTCXO(1.7);
+  if (err != RADIOLIB_ERR_NONE) {
+    Serial.print("setTCXO() failed, code: ");
+    Serial.println(err);
+  }
+
+  rtc.begin();
+  rtc.setTime(12, 0, 0);
+  rtc.setDate(4, 11, 24);
+
+  // Join network
+  isJoined = joinNetwork();
+  if (!isJoined) {
+    Serial.println("Initial join failed, will retry in loop...");
+  } else {
+    Serial.println("Starting periodic transmissions...");
+  }
+}
+
+// --- Loop ---
 void loop() {
-  // Send at the defined interval
-  if (!last_tx || millis() - last_tx >= TX_INTERVAL) {
+  if (millis() - last_tx >= TX_INTERVAL) {
     sendPacket();
     last_tx = millis();
   }
-
-  // You may insert low-power sleep or other code here
   delay(10);
 }
+
+
+
