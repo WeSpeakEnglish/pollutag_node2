@@ -58,7 +58,7 @@ extern "C" {
  *        - 0x01000400: Link Layer TS001-1.0.4 + Regional Parameters RP002-1.0.1
  *        - 0x01010100: soon available ...
  */
-#define LORAMAC_SPECIFICATION_VERSION                   0x01000300
+#define LORAMAC_SPECIFICATION_VERSION                   0x01000400
 
 /*!
  * @brief Enable the additional LoRaWAN packages

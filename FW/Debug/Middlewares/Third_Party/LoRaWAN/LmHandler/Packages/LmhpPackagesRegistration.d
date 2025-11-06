@@ -48,10 +48,10 @@ Middlewares/Third_Party/LoRaWAN/LmHandler/Packages/LmhpPackagesRegistration.o: \
  ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_system.h \
  ../Core/Inc/main.h ../Core/Inc/nortos.h \
  ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_gpio.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h \
  ../Middlewares/Third_Party/LoRaWAN/LmHandler/Packages/LmhpPackagesRegistration.h \
  ../Middlewares/Third_Party/LoRaWAN/LmHandler/Packages/LmhPackage.h \
  ../Middlewares/Third_Party/LoRaWAN/LmHandler/LmHandlerTypes.h \
@@ -124,10 +124,10 @@ Middlewares/Third_Party/LoRaWAN/LmHandler/Packages/LmhpPackagesRegistration.o: \
 ../Core/Inc/main.h:
 ../Core/Inc/nortos.h:
 ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_gpio.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h:
 ../Middlewares/Third_Party/LoRaWAN/LmHandler/Packages/LmhpPackagesRegistration.h:
 ../Middlewares/Third_Party/LoRaWAN/LmHandler/Packages/LmhPackage.h:
 ../Middlewares/Third_Party/LoRaWAN/LmHandler/LmHandlerTypes.h:

@@ -5,7 +5,7 @@
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCommands.c:181:13:LinkedListAdd	5
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCommands.c:216:22:LinkedListGetPrevious	6
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCommands.c:252:13:LinkedListRemove	6
-../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCommands.c:288:13:IsSticky	4
+../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCommands.c:288:13:IsSticky	3
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCommands.c:317:13:IsConfirmationRequired	1
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCommands.c:332:24:LoRaMacCommandsInit	1
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCommands.c:342:24:LoRaMacCommandsAddCmd	4

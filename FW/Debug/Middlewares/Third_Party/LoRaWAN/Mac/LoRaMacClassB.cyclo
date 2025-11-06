@@ -27,4 +27,5 @@
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacClassB.c:1987:6:LoRaMacClassBStopRxSlots	1
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacClassB.c:2000:6:LoRaMacClassBStartRxSlots	1
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacClassB.c:2016:6:LoRaMacClassBSetMulticastPeriodicity	1
+../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacClassB.c:2028:6:LoRaMacClassBSetFPendingBit	1
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacClassB.c:2057:6:LoRaMacClassBProcess	1

@@ -1,5 +1,5 @@
-../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:314:13:PrintKey	152	static
-../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:347:13:PrintIds	88	static
+../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:314:13:PrintKey	24	static
+../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:347:13:PrintIds	40	static
 ../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:368:30:GetKeyByID	24	static
 ../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:419:30:ComputeCmac	336	static
 ../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:577:23:SecureElementInit	16	static
@@ -16,7 +16,6 @@
 ../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:1149:23:SecureElementAesEncrypt	272	static
 ../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:1238:23:SecureElementDeriveAndStoreKey	40	static
 ../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:1328:23:SecureElementProcessJoinAccept	32	static
-../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:1427:23:SecureElementRandomNumber	16	static
 ../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:1438:23:SecureElementSetDevEui	16	static
 ../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:1463:23:SecureElementGetDevEui	16	static
 ../Middlewares/Third_Party/LoRaWAN/Crypto/soft-se.c:1487:23:SecureElementSetJoinEui	16	static

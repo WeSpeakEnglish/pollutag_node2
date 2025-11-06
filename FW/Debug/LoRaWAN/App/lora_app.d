@@ -46,10 +46,10 @@ LoRaWAN/App/lora_app.o: ../LoRaWAN/App/lora_app.c ../Core/Inc/platform.h \
  ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_system.h \
  ../Core/Inc/main.h ../Core/Inc/nortos.h \
  ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_gpio.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h \
  ../Core/Inc/sys_app.h ../Core/Inc/sys_conf.h \
  ../Utilities/trace/adv_trace/stm32_adv_trace.h \
  ../Core/Inc/utilities_conf.h ../Drivers/CMSIS/Include/cmsis_compiler.h \
@@ -129,10 +129,10 @@ LoRaWAN/App/lora_app.o: ../LoRaWAN/App/lora_app.c ../Core/Inc/platform.h \
 ../Core/Inc/main.h:
 ../Core/Inc/nortos.h:
 ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_gpio.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h:
 ../Core/Inc/sys_app.h:
 ../Core/Inc/sys_conf.h:
 ../Utilities/trace/adv_trace/stm32_adv_trace.h:

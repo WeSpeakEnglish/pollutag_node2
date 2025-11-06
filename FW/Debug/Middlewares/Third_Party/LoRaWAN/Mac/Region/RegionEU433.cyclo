@@ -16,6 +16,5 @@
 ../Middlewares/Third_Party/LoRaWAN/Mac/Region/RegionEU433.c:875:17:RegionEU433NextChannel	1
 ../Middlewares/Third_Party/LoRaWAN/Mac/Region/RegionEU433.c:934:17:RegionEU433ChannelAdd	1
 ../Middlewares/Third_Party/LoRaWAN/Mac/Region/RegionEU433.c:997:6:RegionEU433ChannelsRemove	1
-../Middlewares/Third_Party/LoRaWAN/Mac/Region/RegionEU433.c:1017:6:RegionEU433SetContinuousWave	1
 ../Middlewares/Third_Party/LoRaWAN/Mac/Region/RegionEU433.c:1032:9:RegionEU433ApplyDrOffset	1
 ../Middlewares/Third_Party/LoRaWAN/Mac/Region/RegionEU433.c:1047:6:RegionEU433RxBeaconSetup	1

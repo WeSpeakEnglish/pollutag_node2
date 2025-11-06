@@ -14,7 +14,7 @@
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCrypto.c:923:23:LoRaMacCryptoInit	16	static
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCrypto.c:948:23:LoRaMacCryptoSetLrWanVersion	16	static
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCrypto.c:954:23:LoRaMacCryptoGetFCntUp	16	static
-../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCrypto.c:966:23:LoRaMacCryptoGetFCntDown	72	static
+../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCrypto.c:1020:23:LoRaMacCryptoGetFCntDown	40	static
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCrypto.c:1066:23:LoRaMacCryptoGetRJcount	16	static
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCrypto.c:1090:23:LoRaMacCryptoSetMulticastReference	24	static
 ../Middlewares/Third_Party/LoRaWAN/Mac/LoRaMacCrypto.c:1105:23:LoRaMacCryptoSetKey	16	static

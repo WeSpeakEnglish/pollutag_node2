@@ -60,4 +60,4 @@
 ../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_rcc.c:1537:13:HAL_RCC_CSSCallback	4	static
 ../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_rcc.c:1550:10:HAL_RCC_GetResetSource	16	static
 ../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_rcc.c:1583:26:RCC_SetFlashLatencyFromMSIRange	32	static
-../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_rcc.c:1605:26:RCC_SetFlashLatency	72	static
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_rcc.c:1605:26:RCC_SetFlashLatency	64	static

@@ -50,8 +50,6 @@
 "./Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_spi.o"
 "./Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_spi_ex.o"
 "./Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_subghz.o"
-"./Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_tim.o"
-"./Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_tim_ex.o"
 "./Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_uart.o"
 "./Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_hal_uart_ex.o"
 "./Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_adc.o"

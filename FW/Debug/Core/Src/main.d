@@ -47,8 +47,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/nortos.h ../Core/Inc/i2c.h ../Core/Inc/main.h \
  ../LoRaWAN/App/app_lorawan.h ../Core/Inc/lptim.h ../Core/Inc/spi.h \
  ../Core/Inc/usart.h ../Core/Inc/gpio.h \
- D:/PRJ/pollutag_node2/Drivers/SEN5x/sen5x_i2c.h \
- D:/PRJ/pollutag_node2/Drivers/SEN5x/sensirion_config.h
+ D:/PRJ/pollutag_node2/FW/Drivers/SEN5x/sen5x_i2c.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/SEN5x/sensirion_config.h
 ../Core/Inc/main.h:
 ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_hal.h:
 ../Core/Inc/stm32wlxx_hal_conf.h:
@@ -103,5 +103,5 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/spi.h:
 ../Core/Inc/usart.h:
 ../Core/Inc/gpio.h:
-D:/PRJ/pollutag_node2/Drivers/SEN5x/sen5x_i2c.h:
-D:/PRJ/pollutag_node2/Drivers/SEN5x/sensirion_config.h:
+D:/PRJ/pollutag_node2/FW/Drivers/SEN5x/sen5x_i2c.h:
+D:/PRJ/pollutag_node2/FW/Drivers/SEN5x/sensirion_config.h:

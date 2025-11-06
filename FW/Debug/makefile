@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (12.3.rel1)
+# Toolchain: GNU Tools for STM32 (13.3.rel1)
 ################################################################################
 
 -include ../makefile.init
@@ -50,40 +50,40 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := polluTAG_node2
+BUILD_ARTIFACT_NAME := pollutag_node2
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-polluTAG_node2.elf \
+pollutag_node2.elf \
 
 MAP_FILES += \
-polluTAG_node2.map \
+pollutag_node2.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-polluTAG_node2.list \
+pollutag_node2.list \
 
 OBJCOPY_HEX += \
-polluTAG_node2.hex \
+pollutag_node2.hex \
 
 OBJCOPY_BIN += \
-polluTAG_node2.bin \
+pollutag_node2.bin \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: polluTAG_node2.elf secondary-outputs
+main-build: pollutag_node2.elf secondary-outputs
 
 # Tool invocations
-polluTAG_node2.elf polluTAG_node2.map: $(OBJS) $(USER_OBJS) D:\PRJ\pollutag_node2\STM32WLE5JCIX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "polluTAG_node2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\PRJ\pollutag_node2\STM32WLE5JCIX_FLASH.ld" --specs=nosys.specs -Wl,-Map="polluTAG_node2.map" -Wl,--verbose -static  -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+pollutag_node2.elf pollutag_node2.map: $(OBJS) $(USER_OBJS) D:\PRJ\pollutag_node2\FW\STM32WLE5JCIX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "pollutag_node2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\PRJ\pollutag_node2\FW\STM32WLE5JCIX_FLASH.ld" -Wl,-Map="pollutag_node2.map" -Wl,--gc-sections -Wl,--verbose -static  -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -92,24 +92,24 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-polluTAG_node2.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "polluTAG_node2.list"
+pollutag_node2.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "pollutag_node2.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-polluTAG_node2.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "polluTAG_node2.hex"
+pollutag_node2.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "pollutag_node2.hex"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-polluTAG_node2.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "polluTAG_node2.bin"
+pollutag_node2.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "pollutag_node2.bin"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) default.size.stdout polluTAG_node2.bin polluTAG_node2.elf polluTAG_node2.hex polluTAG_node2.list polluTAG_node2.map
+	-$(RM) default.size.stdout pollutag_node2.bin pollutag_node2.elf pollutag_node2.hex pollutag_node2.list pollutag_node2.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)

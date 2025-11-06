@@ -49,10 +49,10 @@ Middlewares/Third_Party/SubGHz_Phy/stm32_radio_driver/radio_driver.o: \
  ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_system.h \
  ../Core/Inc/main.h ../Core/Inc/nortos.h \
  ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_gpio.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h \
  ../Core/Inc/subghz.h ../Utilities/misc/stm32_mem.h \
  ../Core/Inc/utilities_conf.h ../Drivers/CMSIS/Include/cmsis_compiler.h \
  ../Utilities/misc/stm32_tiny_vsnprintf.h ../Core/Inc/utilities_def.h \
@@ -112,10 +112,10 @@ Middlewares/Third_Party/SubGHz_Phy/stm32_radio_driver/radio_driver.o: \
 ../Core/Inc/main.h:
 ../Core/Inc/nortos.h:
 ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_gpio.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h:
 ../Core/Inc/subghz.h:
 ../Utilities/misc/stm32_mem.h:
 ../Core/Inc/utilities_conf.h:

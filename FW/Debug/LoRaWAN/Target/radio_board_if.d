@@ -47,10 +47,10 @@ LoRaWAN/Target/radio_board_if.o: ../LoRaWAN/Target/radio_board_if.c \
  ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_system.h \
  ../Core/Inc/main.h ../Core/Inc/nortos.h \
  ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_gpio.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h \
- D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h \
+ D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h
 ../LoRaWAN/Target/radio_board_if.h:
 ../Core/Inc/platform.h:
 ../Drivers/CMSIS/Device/ST/STM32WLxx/Include/stm32wlxx.h:
@@ -101,7 +101,7 @@ LoRaWAN/Target/radio_board_if.o: ../LoRaWAN/Target/radio_board_if.c \
 ../Core/Inc/main.h:
 ../Core/Inc/nortos.h:
 ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_gpio.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h:
-D:/PRJ/pollutag_node2/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_radio.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_errno.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo_conf.h:
+D:/PRJ/pollutag_node2/FW/Drivers/BSP/STM32WLxx_Nucleo/stm32wlxx_nucleo.h:

@@ -17,7 +17,6 @@
 ../Middlewares/Third_Party/LoRaWAN/Mac/Region/Region.c:927:17:RegionNextChannel	2
 ../Middlewares/Third_Party/LoRaWAN/Mac/Region/Region.c:948:17:RegionChannelAdd	2
 ../Middlewares/Third_Party/LoRaWAN/Mac/Region/Region.c:969:6:RegionChannelsRemove	2
-../Middlewares/Third_Party/LoRaWAN/Mac/Region/Region.c:991:6:RegionSetContinuousWave	2
 ../Middlewares/Third_Party/LoRaWAN/Mac/Region/Region.c:1013:9:RegionApplyDrOffset	2
 ../Middlewares/Third_Party/LoRaWAN/Mac/Region/Region.c:1034:6:RegionRxBeaconSetup	2
 ../Middlewares/Third_Party/LoRaWAN/Mac/Region/Region.c:1055:11:RegionGetVersion	1
