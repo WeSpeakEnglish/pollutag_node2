@@ -108,10 +108,10 @@ Decoder for payload on server side (uplink):
 
 Notes:
 - The firmware package FW_WL V1.3.1 is only needed to regenerate code from the `.ioc`; building works without it.
-- Application code lives in `Core/Src/app_sensor.c` (sensor and measurement cycle) and `LoRaWAN/App/lora_app.c`
+- Application code lives in `FW/Core/Src/app_sensor.c` (sensor and measurement cycle) and `FW/LoRaWAN/App/lora_app.c`
   (uplink payload, downlinks), inside the CubeMX `USER CODE` sections so regenerating keeps it.
 - The last 4 KB of flash (0x0803F000) hold the LoRaWAN session and are reserved in `STM32WLE5JCIX_FLASH.ld`.
-- Enter the LoRaWAN credentials of your device in `LoRaWAN/App/lorawan_credentials.h` before building, see [LoRaWAN credentials](#lorawan-credentials).
+- Enter the LoRaWAN credentials of your device in `FW/LoRaWAN/App/lorawan_credentials.h` before building, see [LoRaWAN credentials](#lorawan-credentials).
 
 ## Preparation
 Originally LORA-E5 (Wio)  modules came pre-programmed with AT-command enabled stack, working like a LoRaWAN modem.
@@ -135,7 +135,7 @@ The keys are **not** taken from the `.ioc` (it keeps zeros). Each device has its
 #define LORAWAN_APP_KEY       00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00  // 16 bytes
 ```
 
-1. Copy `LoRaWAN/App/lorawan_credentials_template.h` to `LoRaWAN/App/lorawan_credentials.h`
+1. Copy `FW/LoRaWAN/App/lorawan_credentials_template.h` to `FW/LoRaWAN/App/lorawan_credentials.h`
    (if the file is missing the build stops with a message saying so).
 2. Enter the values from your network console (TTN, Helium, ChirpStack...) as comma separated hex
    bytes, MSB first, exactly as the console shows them.
