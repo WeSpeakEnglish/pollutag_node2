@@ -36,14 +36,11 @@
 #include "flash_if.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "app_sensor.h"
 /* USER CODE END Includes */
 
 /* External variables ---------------------------------------------------------*/
 /* USER CODE BEGIN EV */
-extern double temperatureTX;
-extern uint32_t extBattery;
-extern uint8_t LEDON;
 /* USER CODE END EV */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -85,12 +82,34 @@ typedef enum TxEventType_e
 /*---------------------------------------------------------------------------*/
 /**
   * @brief LoRaWAN NVM Flash address
-  * @note last 2 sector of a 128kBytes device
+  * @note last 2 pages (4 KB) of the 256 KB STM32WLE5JC, reserved as region NVM
+  *       in STM32WLE5JCIX_FLASH.ld so code can never grow into it
   */
 #define LORAWAN_NVM_BASE_ADDRESS                    ((void *)0x0803F000UL)
 
 /* USER CODE BEGIN PD */
 static const char *slotStrings[] = { "1", "2", "C", "C_MC", "P", "P_MC" };
+
+/* Retry delay when the MAC is busy */
+#define TX_RETRY_TIME_MS        10000U
+/* Shortest periodic uplink interval */
+#define UPLINK_PERIOD_MIN_MS    60000U
+
+/* Downlink commands on LORAWAN_USER_APP_PORT ---------------------------------
+ *   01 ss              LED            ss: 00 = off, 01 = on
+ *   02 mm              measure period mm: minutes, 00 = measuring off,
+ *                                         01 is raised to the 2 min minimum
+ *   03 mm              uplink period  mm: minutes. Uplinks are then sent only
+ *                                         on this timer (latest values).
+ *                                         00 = one uplink after each measurement
+ *   FF FF FF FF FF FF  reset
+ */
+#define DL_CMD_LED              0x01U
+#define DL_CMD_MEASURE_PERIOD   0x02U
+#define DL_CMD_UPLINK_PERIOD    0x03U
+#define DL_RESET_LEN            6U
+#define DL_RESET_BYTE           0xFFU
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -217,24 +236,12 @@ static void OnPingSlotPeriodicityChanged(uint8_t pingSlotPeriodicity);
 static void OnSystemReset(void);
 
 /* USER CODE BEGIN PFP */
-
-/**
-  * @brief  LED Tx timer callback function
-  * @param  context ptr of LED context
-  */
-static void OnTxTimerLedEvent(void *context);
-
-/**
-  * @brief  LED Rx timer callback function
-  * @param  context ptr of LED context
-  */
-static void OnRxTimerLedEvent(void *context);
-
-/**
-  * @brief  LED Join timer callback function
-  * @param  context ptr of LED context
-  */
-static void OnJoinTimerLedEvent(void *context);
+static void OnTxRetryTimerEvent(void *context);
+static void SetUplinkPeriod(uint32_t periodMs);
+static void RequestSend(void);
+static void SetLed(bool on);
+static void ProcessAppDownlink(const uint8_t *buf, uint8_t size);
+static uint8_t BuildPayload(uint8_t *buf, uint8_t batteryLevel);
 
 /* USER CODE END PFP */
 
@@ -321,24 +328,24 @@ static uint8_t AppDataBuffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE];
 static LmHandlerAppData_t AppData = { 0, 0, AppDataBuffer };
 
 /**
-  * @brief Specifies the state of the application LED
+  * @brief Uplink waiting for the network join / a free MAC
   */
-static uint8_t AppLedStateOn = RESET;
+static volatile bool PendingTx = false;
 
 /**
-  * @brief Timer to handle the application Tx Led to toggle
+  * @brief Retry timer used when the MAC is busy
   */
-static UTIL_TIMER_Object_t TxLedTimer;
+static UTIL_TIMER_Object_t TxRetryTimer;
 
 /**
-  * @brief Timer to handle the application Rx Led to toggle
+  * @brief State of the user LED (reported in the uplink)
   */
-static UTIL_TIMER_Object_t RxLedTimer;
+static bool LedOn = false;
 
 /**
-  * @brief Timer to handle the application Join Led to toggle
+  * @brief Periodic uplink interval [ms]; 0 = one uplink after each measurement
   */
-static UTIL_TIMER_Object_t JoinLedTimer;
+static uint32_t UplinkPeriodMs = 0U;
 
 /* USER CODE END PV */
 
@@ -388,10 +395,6 @@ void LoRaWAN_Init(void)
           (uint8_t)(feature_version >> 8),
           (uint8_t)(feature_version));
 
-  UTIL_TIMER_Create(&TxLedTimer, LED_PERIOD_TIME, UTIL_TIMER_ONESHOT, OnTxTimerLedEvent, NULL);
-  UTIL_TIMER_Create(&RxLedTimer, LED_PERIOD_TIME, UTIL_TIMER_ONESHOT, OnRxTimerLedEvent, NULL);
-  UTIL_TIMER_Create(&JoinLedTimer, LED_PERIOD_TIME, UTIL_TIMER_PERIODIC, OnJoinTimerLedEvent, NULL);
-
   /* USER CODE END LoRaWAN_Init_1 */
 
   UTIL_TIMER_Create(&StopJoinTimer, JOIN_TIME, UTIL_TIMER_ONESHOT, OnStopJoinTimerEvent, NULL);
@@ -411,7 +414,21 @@ void LoRaWAN_Init(void)
   LmHandlerConfigure(&LmHandlerParams);
 
   /* USER CODE BEGIN LoRaWAN_Init_2 */
-  UTIL_TIMER_Start(&JoinLedTimer);
+  {
+    /* Print the identity used for the OTAA join, e.g. a DevEUI derived from
+     * the MCU unique ID that must be entered in the network console */
+    uint8_t eui[8];
+    if (LmHandlerGetDevEUI(eui) == LORAMAC_HANDLER_SUCCESS)
+    {
+      APP_LOG(TS_OFF, VLEVEL_M, "DevEUI:  %02X%02X%02X%02X%02X%02X%02X%02X\r\n",
+              eui[0], eui[1], eui[2], eui[3], eui[4], eui[5], eui[6], eui[7]);
+    }
+    if (LmHandlerGetAppEUI(eui) == LORAMAC_HANDLER_SUCCESS)
+    {
+      APP_LOG(TS_OFF, VLEVEL_M, "JoinEUI: %02X%02X%02X%02X%02X%02X%02X%02X\r\n",
+              eui[0], eui[1], eui[2], eui[3], eui[4], eui[5], eui[6], eui[7]);
+    }
+  }
 
   /* USER CODE END LoRaWAN_Init_2 */
 
@@ -427,146 +444,220 @@ void LoRaWAN_Init(void)
   {
     /* USER CODE BEGIN LoRaWAN_Init_3 */
 
-#if 0 // XXX:
-    /* send every time button is pushed */
-    BSP_PB_Init(BUTTON_SW1, BUTTON_MODE_EXTI);
-#endif
     /* USER CODE END LoRaWAN_Init_3 */
   }
 
   /* USER CODE BEGIN LoRaWAN_Init_Last */
+  /* Default: one uplink after each measurement (LoRaWAN_OnMeasurementDone).
+   * TxTimer only runs when an uplink period is set by downlink (cmd 0x03). */
+  UTIL_TIMER_Stop(&TxTimer);
+  UTIL_TIMER_Create(&TxRetryTimer, TX_RETRY_TIME_MS, UTIL_TIMER_ONESHOT, OnTxRetryTimerEvent, NULL);
 
   /* USER CODE END LoRaWAN_Init_Last */
 }
 
 /* USER CODE BEGIN PB_Callbacks */
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-//  switch (GPIO_Pin)
-//  {
-//    case  BUT1_Pin:
-    	// XXX: always initialized
-//      if (EventType == TX_ON_EVENT || 1)
-//      {
- //     UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_LoRaSendOnTxTimerOrButtonEvent), CFG_SEQ_Prio_0);
- //     }
-//      break;
-//    default:
- //     break;
- // }
-}
-
 /* USER CODE END PB_Callbacks */
 
 /* Private functions ---------------------------------------------------------*/
 /* USER CODE BEGIN PrFD */
+static void RequestSend(void)
+{
+  UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_LoRaSendOnTxTimerOrButtonEvent), CFG_SEQ_Prio_0);
+}
+
+void LoRaWAN_OnMeasurementDone(void)
+{
+  /* with an uplink period set, uplinks come only from TxTimer */
+  if (UplinkPeriodMs == 0U)
+  {
+    RequestSend();
+  }
+}
+
+static void OnTxRetryTimerEvent(void *context)
+{
+  if (PendingTx)
+  {
+    RequestSend();
+  }
+}
+
+/**
+  * @brief Set the uplink mode.
+  * @param periodMs 0 = one uplink after each measurement; otherwise uplinks are
+  *        sent only every periodMs (at least UPLINK_PERIOD_MIN_MS), each with
+  *        the latest measurement
+  */
+static void SetUplinkPeriod(uint32_t periodMs)
+{
+  if (periodMs == 0U)
+  {
+    UplinkPeriodMs = 0U;
+    UTIL_TIMER_Stop(&TxTimer);
+    APP_LOG(TS_OFF, VLEVEL_M, "Uplink after each measurement\r\n");
+  }
+  else
+  {
+    UplinkPeriodMs = MAX(periodMs, UPLINK_PERIOD_MIN_MS);
+    OnTxPeriodicityChanged(UplinkPeriodMs);   /* restarts TxTimer */
+    APP_LOG(TS_OFF, VLEVEL_M, "Uplink every %u s\r\n", (unsigned)(UplinkPeriodMs / 1000U));
+  }
+}
+
+static void SetLed(bool on)
+{
+  LedOn = on;
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, on ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  APP_LOG(TS_OFF, VLEVEL_M, "LED %s\r\n", on ? "ON" : "OFF");
+}
+
+/**
+  * @brief Execute a downlink received on LORAWAN_USER_APP_PORT (see DL_CMD_xxx)
+  */
+static void ProcessAppDownlink(const uint8_t *buf, uint8_t size)
+{
+  if (size == DL_RESET_LEN)
+  {
+    for (uint8_t i = 0; i < DL_RESET_LEN; i++)
+    {
+      if (buf[i] != DL_RESET_BYTE)
+      {
+        APP_LOG(TS_OFF, VLEVEL_M, "Unknown downlink\r\n");
+        return;
+      }
+    }
+    NVIC_SystemReset();
+  }
+
+  if (size != 2U)
+  {
+    APP_LOG(TS_OFF, VLEVEL_M, "Unknown downlink\r\n");
+    return;
+  }
+
+  switch (buf[0])
+  {
+    case DL_CMD_LED:
+      if (buf[1] <= 1U)
+      {
+        SetLed(buf[1] == 1U);
+      }
+      break;
+    case DL_CMD_MEASURE_PERIOD:
+      AppSensor_SetPeriod((uint16_t)buf[1] * 60U);
+      APP_LOG(TS_OFF, VLEVEL_M, "Measure period %u min\r\n", buf[1]);
+      break;
+    case DL_CMD_UPLINK_PERIOD:
+      SetUplinkPeriod((uint32_t)buf[1] * 60000U);
+      break;
+    default:
+      APP_LOG(TS_OFF, VLEVEL_M, "Unknown downlink cmd 0x%02X\r\n", buf[0]);
+      break;
+  }
+}
+
+/**
+  * @brief Build the 14-byte uplink payload (big endian):
+  *   0-1  PM1.0  [ug/m3 x10]      0xFFFF = invalid
+  *   2-3  PM2.5  [ug/m3 x10]      0xFFFF = invalid
+  *   4-5  PM10   [ug/m3 x10]      0xFFFF = invalid
+  *   6-7  temperature: v = T*100 + 10000, bytes v/100, v%100   FF FF = invalid
+  *   8-9  humidity:    v = RH*100,        bytes v/100, v%100   FF FF = invalid
+  *   10-11 VOC index x10          0xFFFF = invalid
+  *   12   battery level (average ADC counts / 8)
+  *   13   LED state
+  * @return payload size
+  */
+static uint8_t BuildPayload(uint8_t *buf, uint8_t batteryLevel)
+{
+  const AppSensor_Data_t *d = AppSensor_GetData();
+  uint8_t i = 0;
+  int16_t v;
+
+  buf[i++] = (uint8_t)(d->pm1p0 >> 8);
+  buf[i++] = (uint8_t)(d->pm1p0);
+  buf[i++] = (uint8_t)(d->pm2p5 >> 8);
+  buf[i++] = (uint8_t)(d->pm2p5);
+  buf[i++] = (uint8_t)(d->pm10p0 >> 8);
+  buf[i++] = (uint8_t)(d->pm10p0);
+
+  if (d->climateValid)
+  {
+    v = (int16_t)(d->temperature * 100.0) + 10000;
+    buf[i++] = (uint8_t)(v / 100);
+    buf[i++] = (uint8_t)(v % 100);
+    v = (int16_t)(d->humidity * 100.0);
+    buf[i++] = (uint8_t)(v / 100);
+    buf[i++] = (uint8_t)(v % 100);
+  }
+  else
+  {
+    /* FF FF cannot occur in the normal encoding (2nd byte is 0..99) */
+    buf[i++] = 0xFF;
+    buf[i++] = 0xFF;
+    buf[i++] = 0xFF;
+    buf[i++] = 0xFF;
+  }
+
+  buf[i++] = (uint8_t)(d->vocIndex >> 8);
+  buf[i++] = (uint8_t)(d->vocIndex);
+  buf[i++] = batteryLevel;
+  buf[i++] = LedOn ? 1U : 0U;
+
+  return i;
+}
 
 /* USER CODE END PrFD */
 
 static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
 {
   /* USER CODE BEGIN OnRxData_1 */
- uint8_t RxPort = 0;
-
-  if (params != NULL)
+  if ((params == NULL) || (appData == NULL))
   {
-#if 0   // XXX:
-    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET); /* LED_BLUE */
-#endif
+    return;
+  }
 
-    UTIL_TIMER_Start(&RxLedTimer);
-
-    if (params->IsMcpsIndication)
-    {
-      if (appData != NULL)
-      {
-        RxPort = appData->Port;
-        if (appData->Buffer != NULL)
-        {
+  if (params->IsMcpsIndication && (appData->Buffer != NULL))
+  {
     switch (appData->Port)
     {
       case LORAWAN_SWITCH_CLASS_PORT:
-        /*this port switches the class*/
+        /* this port switches the class */
         if (appData->BufferSize == 1)
         {
           switch (appData->Buffer[0])
           {
             case 0:
-            {
               LmHandlerRequestClass(CLASS_A);
               break;
-            }
             case 1:
-            {
               LmHandlerRequestClass(CLASS_B);
               break;
-            }
             case 2:
-            {
               LmHandlerRequestClass(CLASS_C);
               break;
-            }
             default:
               break;
           }
         }
         break;
+
       case LORAWAN_USER_APP_PORT:
-        if (appData->BufferSize == 2)
-        {
-          AppLedStateOn = appData->Buffer[0] & 0x01;
-          if (AppLedStateOn == RESET)
-          {
-            APP_LOG(TS_OFF, VLEVEL_H,   "LED OFF\r\n");
-            LEDON = 0;
-            HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET); /* LED_RED */
-          }
-          else
-          {
-            APP_LOG(TS_OFF, VLEVEL_H, "LED ON\r\n");
-                  LEDON = 1;
-                  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET); /* LED_RED */
-          }
-            MEASURE_PERIOD = (appData->Buffer[1]) * 60; //convert into seconds
-        }
-        else
-        	if(appData->BufferSize == 6){
-              if(	  (appData->Buffer[0] == 0xFF)&&
-					  (appData->Buffer[1] == 0xFF)&&
-					  (appData->Buffer[2] == 0xFF)&&
-					  (appData->Buffer[3] == 0xFF)&&
-					  (appData->Buffer[4] == 0xFF)&&
-					  (appData->Buffer[5] == 0xFF))
-
-            	  NVIC_SystemReset(); //cmd reset
-              else
-              if(	  (appData->Buffer[0] == 0x01)&&
-					  (appData->Buffer[1] == 0x00))
-            	  OnTxPeriodicityChanged(((appData->Buffer[2])<<24) +
-            			  	  	  	  	  ((appData->Buffer[3])<<16) +
-										  ((appData->Buffer[4])<<8) +
-										  (appData->Buffer[5])); // cmd change periodicity ms
-
-
-
-        	}
-
-
+        ProcessAppDownlink(appData->Buffer, appData->BufferSize);
         break;
 
       default:
-
         break;
     }
   }
-      }
-    }
-    if (params->RxSlot < RX_SLOT_NONE)
-    {
-      APP_LOG(TS_OFF, VLEVEL_H, "###### D/L FRAME:%04d | PORT:%d | DR:%d | SLOT:%s | RSSI:%d | SNR:%d\r\n",
-              params->DownlinkCounter, RxPort, params->Datarate, slotStrings[params->RxSlot], params->Rssi, params->Snr);
-    }
+
+  if (params->RxSlot < RX_SLOT_NONE)
+  {
+    APP_LOG(TS_OFF, VLEVEL_H, "###### D/L FRAME:%04d | PORT:%d | DR:%d | SLOT:%s | RSSI:%d | SNR:%d\r\n",
+            params->DownlinkCounter, appData->Port, params->Datarate, slotStrings[params->RxSlot],
+            params->Rssi, params->Snr);
   }
   /* USER CODE END OnRxData_1 */
 }
@@ -574,62 +665,43 @@ static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
 static void SendTxData(void)
 {
   /* USER CODE BEGIN SendTxData_1 */
-  LmHandlerErrorStatus_t status = LORAMAC_HANDLER_ERROR;
-  extBattery = GetBatteryLevel();
-  UTIL_TIMER_Time_t nextTxIn = 0;
+  LmHandlerErrorStatus_t status;
+  uint8_t batteryLevel = GetBatteryLevel();
 
-
-  uint32_t i = 0;
-
-
-  APP_LOG(TS_ON, VLEVEL_M, "VDDA: %d\r\n", extBattery);
+  /* the sensor uses the supply level to decide whether to power up */
+  AppSensor_SetSupplyLevel(batteryLevel);
+  APP_LOG(TS_ON, VLEVEL_M, "Battery level: %u\r\n", batteryLevel);
 
   AppData.Port = LORAWAN_USER_APP_PORT;
-  AppData.Buffer[i++] = (PM1) >> 8;
-  AppData.Buffer[i++] = (PM1)%256;
-  AppData.Buffer[i++] = (PM2_5)>>8;
-  AppData.Buffer[i++] = (PM2_5)%256;
-  AppData.Buffer[i++] = (PM10)>>8;
-  AppData.Buffer[i++] = (PM10)%256;
-  int16_t tempVar;
-  tempVar = ((int16_t)(temperatureTX*100.0)) + 10000;
-  AppData.Buffer[i++] = tempVar/100;
-  AppData.Buffer[i++] = tempVar%100;
-  tempVar = ((int16_t)(humidity*100.0));
-  AppData.Buffer[i++] = tempVar/100;
-  AppData.Buffer[i++] = tempVar%100;
-  AppData.Buffer[i++] = VOC/256;
-  AppData.Buffer[i++] = VOC%256;
-  AppData.Buffer[i++] = extBattery;
-  AppData.Buffer[i++] = LEDON;
+  AppData.BufferSize = BuildPayload(AppData.Buffer, batteryLevel);
 
-  AppData.BufferSize = i;
+  /* allowDelayedTx = true: if the duty cycle is not free yet the MAC queues
+   * the frame and sends it as soon as allowed */
+  status = LmHandlerSend(&AppData, LmHandlerParams.IsTxConfirmed, true);
+  PendingTx = false;
 
-  if ((JoinLedTimer.IsRunning) && (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET))
+  switch (status)
   {
-    UTIL_TIMER_Stop(&JoinLedTimer);
-
-  }
-
-  status = LmHandlerSend(&AppData, LmHandlerParams.IsTxConfirmed, false);
-  if (LORAMAC_HANDLER_SUCCESS == status)
-  {
-    APP_LOG(TS_ON, VLEVEL_L, "SEND REQUEST\r\n");
-  }
-  else if (LORAMAC_HANDLER_DUTYCYCLE_RESTRICTED == status)
-  {
-    nextTxIn = LmHandlerGetDutyCycleWaitTime();
-    if (nextTxIn > 0)
-  {
-    APP_LOG(TS_ON, VLEVEL_L, "Next Tx in  : ~%d second(s)\r\n", (nextTxIn / 1000));
-  }
-  }
-
-  if (EventType == TX_ON_TIMER)
-  {
-    UTIL_TIMER_Stop(&TxTimer);
-    UTIL_TIMER_SetPeriod(&TxTimer, MAX(nextTxIn, TxPeriodicity));
-    UTIL_TIMER_Start(&TxTimer);
+    case LORAMAC_HANDLER_SUCCESS:
+      APP_LOG(TS_ON, VLEVEL_L, "SEND REQUEST\r\n");
+      break;
+    case LORAMAC_HANDLER_DUTYCYCLE_RESTRICTED:
+      APP_LOG(TS_ON, VLEVEL_L, "Next Tx in  : ~%d second(s)\r\n", (LmHandlerGetDutyCycleWaitTime() / 1000));
+      break;
+    case LORAMAC_HANDLER_NO_NETWORK_JOINED:
+      /* LmHandlerSend has (re)started the join; send once joined */
+      PendingTx = true;
+      APP_LOG(TS_ON, VLEVEL_M, "Not joined, uplink postponed\r\n");
+      break;
+    case LORAMAC_HANDLER_BUSY_ERROR:
+    case LORAMAC_HANDLER_ERROR:
+      PendingTx = true;
+      UTIL_TIMER_Start(&TxRetryTimer);
+      APP_LOG(TS_ON, VLEVEL_M, "MAC busy, retry in %d s\r\n", TX_RETRY_TIME_MS / 1000);
+      break;
+    default:
+      APP_LOG(TS_ON, VLEVEL_M, "Send failed (%d)\r\n", status);
+      break;
   }
 
   /* USER CODE END SendTxData_1 */
@@ -650,55 +722,27 @@ static void OnTxTimerEvent(void *context)
 }
 
 /* USER CODE BEGIN PrFD_LedEvents */
-static void OnTxTimerLedEvent(void *context)
-{
-#if 0	// XXX: No LED available
-  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET); /* LED_GREEN */
-#endif
-}
-
-static void OnRxTimerLedEvent(void *context)
-{
-#if 0   // XXX: No LED available
-  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET); /* LED_BLUE */
-#endif
-}
-
-static void OnJoinTimerLedEvent(void *context)
-{
-#if 0   // XXX: No LED available
-  HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin); /* LED_RED */
-#endif
-}
 
 /* USER CODE END PrFD_LedEvents */
 
 static void OnTxData(LmHandlerTxParams_t *params)
 {
   /* USER CODE BEGIN OnTxData_1 */
-  if ((params != NULL))
+  /* Process Tx event only if its a mcps response to prevent some internal events (mlme) */
+  if ((params != NULL) && (params->IsMcpsConfirm != 0))
   {
-    /* Process Tx event only if its a mcps response to prevent some internal events (mlme) */
-    if (params->IsMcpsConfirm != 0)
+    APP_LOG(TS_OFF, VLEVEL_M, "\r\n###### ========== MCPS-Confirm =============\r\n");
+    APP_LOG(TS_OFF, VLEVEL_H, "###### U/L FRAME:%04d | PORT:%d | DR:%d | PWR:%d", params->UplinkCounter,
+            params->AppData.Port, params->Datarate, params->TxPower);
+
+    APP_LOG(TS_OFF, VLEVEL_H, " | MSG TYPE:");
+    if (params->MsgType == LORAMAC_HANDLER_CONFIRMED_MSG)
     {
-#if 0	// XXX: No LED available
-      HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET); /* LED_GREEN */
-#endif
-      UTIL_TIMER_Start(&TxLedTimer);
-
-      APP_LOG(TS_OFF, VLEVEL_M, "\r\n###### ========== MCPS-Confirm =============\r\n");
-      APP_LOG(TS_OFF, VLEVEL_H, "###### U/L FRAME:%04d | PORT:%d | DR:%d | PWR:%d", params->UplinkCounter,
-              params->AppData.Port, params->Datarate, params->TxPower);
-
-      APP_LOG(TS_OFF, VLEVEL_H, " | MSG TYPE:");
-      if (params->MsgType == LORAMAC_HANDLER_CONFIRMED_MSG)
-      {
-        APP_LOG(TS_OFF, VLEVEL_H, "CONFIRMED [%s]\r\n", (params->AckReceived != 0) ? "ACK" : "NACK");
-      }
-      else
-      {
-        APP_LOG(TS_OFF, VLEVEL_H, "UNCONFIRMED\r\n");
-      }
+      APP_LOG(TS_OFF, VLEVEL_H, "CONFIRMED [%s]\r\n", (params->AckReceived != 0) ? "ACK" : "NACK");
+    }
+    else
+    {
+      APP_LOG(TS_OFF, VLEVEL_H, "UNCONFIRMED\r\n");
     }
   }
   /* USER CODE END OnTxData_1 */
@@ -707,34 +751,27 @@ static void OnTxData(LmHandlerTxParams_t *params)
 static void OnJoinRequest(LmHandlerJoinParams_t *joinParams)
 {
   /* USER CODE BEGIN OnJoinRequest_1 */
-  if (joinParams != NULL)
+  if (joinParams == NULL)
   {
-    if (joinParams->Status == LORAMAC_HANDLER_SUCCESS)
-    {
-      UTIL_TIMER_Stop(&JoinLedTimer);
-#if 0   // XXX:
-      HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET); /* LED_RED */
-#endif
+    return;
+  }
 
-      APP_LOG(TS_OFF, VLEVEL_M, "\r\n###### = JOINED = ");
-      if (joinParams->Mode == ACTIVATION_TYPE_ABP)
-      {
-        APP_LOG(TS_OFF, VLEVEL_M, "ABP ======================\r\n");
-      }
-      else
-      {
-        APP_LOG(TS_OFF, VLEVEL_M, "OTAA =====================\r\n");
-      }
+  if (joinParams->Status == LORAMAC_HANDLER_SUCCESS)
+  {
+    APP_LOG(TS_OFF, VLEVEL_M, "\r\n###### = JOINED = %s ======================\r\n",
+            (joinParams->Mode == ACTIVATION_TYPE_ABP) ? "ABP" : "OTAA");
+    if (PendingTx)
+    {
+      RequestSend();
     }
-    else
+  }
+  else
+  {
+    APP_LOG(TS_OFF, VLEVEL_M, "\r\n###### = JOIN FAILED\r\n");
+    if (joinParams->Mode == ACTIVATION_TYPE_OTAA)
     {
-      APP_LOG(TS_OFF, VLEVEL_M, "\r\n###### = JOIN FAILED\r\n");
-
-      if (joinParams->Mode == ACTIVATION_TYPE_OTAA) {
-          APP_LOG(TS_OFF, VLEVEL_M, "\r\n###### = RE-TRYING OTAA JOIN\r\n");
-    	/* re-try the OTAA join */
-    	LmHandlerJoin(ActivationType, LORAWAN_FORCE_REJOIN_AT_BOOT);
-      }
+      APP_LOG(TS_OFF, VLEVEL_M, "\r\n###### = RE-TRYING OTAA JOIN\r\n");
+      LmHandlerJoin(ActivationType, LORAWAN_FORCE_REJOIN_AT_BOOT);
     }
   }
   /* USER CODE END OnJoinRequest_1 */
@@ -862,11 +899,6 @@ static void OnSystemReset(void)
 static void StopJoin(void)
 {
   /* USER CODE BEGIN StopJoin_1 */
-#if 0   // XXX: No LED available
-  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET); /* LED_BLUE */
-  HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET); /* LED_RED */
-  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET); /* LED_GREEN */
-#endif
 
   /* USER CODE END StopJoin_1 */
 
@@ -909,11 +941,7 @@ static void OnStopJoinTimerEvent(void *context)
     UTIL_SEQ_SetTask((1 << CFG_SEQ_Task_LoRaStopJoinEvent), CFG_SEQ_Prio_0);
   }
   /* USER CODE BEGIN OnStopJoinTimerEvent_Last */
-#if 0   // XXX: No LED available
-  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET); /* LED_BLUE */
-  HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET); /* LED_RED */
-  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET); /* LED_GREEN */
-#endif
+
   /* USER CODE END OnStopJoinTimerEvent_Last */
 }
 

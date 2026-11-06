@@ -46,7 +46,8 @@ MEMORY
 {
   RAM    (xrw)   : ORIGIN = 0x20000000, LENGTH = 64K
   RAM2   (xrw)   : ORIGIN = 0x10000000, LENGTH = 32K
-  FLASH   (rx)   : ORIGIN = 0x08000000, LENGTH = 256K
+  FLASH   (rx)   : ORIGIN = 0x08000000, LENGTH = 252K
+  NVM     (r)    : ORIGIN = 0x0803F000, LENGTH = 4K   /* LoRaWAN context (LORAWAN_NVM_BASE_ADDRESS), keep free */
 }
 
 /* Sections */

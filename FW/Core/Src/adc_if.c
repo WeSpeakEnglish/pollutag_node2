@@ -68,6 +68,7 @@ extern ADC_HandleTypeDef hadc;
 static uint32_t ADC_ReadChannels(uint32_t channel);
 
 /* USER CODE BEGIN PFP */
+static uint16_t SYS_GetVddaLevel_mV(void);
 
 /* USER CODE END PFP */
 
@@ -97,6 +98,26 @@ void SYS_DeInitMeasurement(void)
 int16_t SYS_GetTemperatureLevel(void)
 {
   /* USER CODE BEGIN SYS_GetTemperatureLevel_1 */
+  /* SYS_GetBatteryLevel() returns raw ADC_CHANNEL_3 counts in this project,
+   * so the generated code below would use a wrong VDDA. Same conversion,
+   * but with VDDA measured via VREFINT: */
+  {
+    __IO int16_t tDegC;
+    uint16_t vddaMv = SYS_GetVddaLevel_mV();
+    uint32_t tsLevel = ADC_ReadChannels(ADC_CHANNEL_TEMPSENSOR);
+    if (((int32_t)*TEMPSENSOR_CAL2_ADDR - (int32_t)*TEMPSENSOR_CAL1_ADDR) != 0)
+    {
+      tDegC = __LL_ADC_CALC_TEMPERATURE(vddaMv, tsLevel, LL_ADC_RESOLUTION_12B);
+    }
+    else
+    {
+      tDegC = __LL_ADC_CALC_TEMPERATURE_TYP_PARAMS(TEMPSENSOR_TYP_AVGSLOPE, TEMPSENSOR_TYP_CAL1_V,
+                                                   TEMPSENSOR_CAL1_TEMP, vddaMv, tsLevel,
+                                                   LL_ADC_RESOLUTION_12B);
+    }
+    tDegC <<= 8;   /* from int16 to q8.7 */
+    return (int16_t)tDegC;
+  }
 
   /* USER CODE END SYS_GetTemperatureLevel_1 */
   __IO int16_t temperatureDegreeC = 0;
@@ -175,6 +196,20 @@ uint16_t SYS_GetBatteryLevel(void)
 
 /* Private Functions Definition -----------------------------------------------*/
 /* USER CODE BEGIN PrFD */
+/* VDDA in mV measured with the internal reference (original ST conversion) */
+static uint16_t SYS_GetVddaLevel_mV(void)
+{
+  uint32_t measuredLevel = ADC_ReadChannels(ADC_CHANNEL_VREFINT);
+  if (measuredLevel == 0)
+  {
+    return 0;
+  }
+  if ((uint32_t)*VREFINT_CAL_ADDR != (uint32_t)0xFFFFU)
+  {
+    return __LL_ADC_CALC_VREFANALOG_VOLTAGE(measuredLevel, ADC_RESOLUTION_12B);
+  }
+  return (VREFINT_CAL_VREF * 1510) / measuredLevel;
+}
 
 /* USER CODE END PrFD */
 

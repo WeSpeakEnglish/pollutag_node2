@@ -73,13 +73,13 @@ extern "C" {
 /*!
  * LoRaWAN default confirm state
  */
-#define LORAWAN_DEFAULT_CONFIRMED_MSG_STATE         LORAMAC_HANDLER_CONFIRMED_MSG
+#define LORAWAN_DEFAULT_CONFIRMED_MSG_STATE         LORAMAC_HANDLER_UNCONFIRMED_MSG
 
 /*!
  * LoRaWAN Adaptive Data Rate
  * @note Please note that when ADR is enabled the end-device should be static
  */
-#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_OFF
+#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_ON
 
 /*!
  * LoRaWAN Default Data Rate
@@ -133,13 +133,6 @@ extern "C" {
 
 /* Exported macros -----------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-extern uint32_t PM1;
-extern uint32_t PM2_5;
-extern uint32_t PM10;
-extern uint16_t VOC;
-extern float temp;
-extern float humidity;
-extern uint16_t MEASURE_PERIOD;
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -149,7 +142,11 @@ extern uint16_t MEASURE_PERIOD;
 void LoRaWAN_Init(void);
 
 /* USER CODE BEGIN EFP */
-
+/**
+  * @brief Notify a finished measurement. Sends an uplink unless an uplink
+  *        period is set by downlink (then uplinks come only from that timer).
+  */
+void LoRaWAN_OnMeasurementDone(void);
 /* USER CODE END EFP */
 
 #ifdef __cplusplus

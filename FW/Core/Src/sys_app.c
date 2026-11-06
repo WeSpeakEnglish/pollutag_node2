@@ -155,13 +155,10 @@ uint8_t GetBatteryLevel(void)
   uint16_t batteryLevelmV;
 
   /* USER CODE BEGIN GetBatteryLevel_0 */
-#ifndef AVERAGEL
-#define AVERAGEL 16
-#endif
-
-  static uint16_t batteryLevelmVA[AVERAGEL];
-  static uint16_t count = 0;
-
+#define BATTERY_AVG_SAMPLES  16U   /* moving average window (uplinks) */
+  static uint16_t samples[BATTERY_AVG_SAMPLES];
+  static uint8_t  next = 0;
+  static bool     primed = false;
   /* USER CODE END GetBatteryLevel_0 */
 
   batteryLevelmV = (uint16_t) SYS_GetBatteryLevel();
@@ -181,18 +178,30 @@ uint8_t GetBatteryLevel(void)
   }
 
   /* USER CODE BEGIN GetBatteryLevel_2 */
-  batteryLevelmVA[count++] = (uint16_t) SYS_GetBatteryLevel();
-  count %= AVERAGEL;
+  /* This project measures the battery on ADC_CHANNEL_3: SYS_GetBatteryLevel()
+   * returns raw ADC counts, so the generic mV conversion above does not apply.
+   * Reported value = sum of the last 16 samples >> 7 = average counts / 8,
+   * truncated to 8 bits (scale used by the backend and the sensor threshold). */
+  uint16_t sample = (uint16_t)SYS_GetBatteryLevel();
+  uint32_t sum = 0;
 
-  batteryLevelmV = 0;
-  for(int i=0; i< AVERAGEL; i++)
-  batteryLevelmV += batteryLevelmVA[i];
+  if (!primed)
+  {
+    /* fill the window so the first readings after boot are not pulled down */
+    for (uint8_t k = 0; k < BATTERY_AVG_SAMPLES; k++)
+    {
+      samples[k] = sample;
+    }
+    primed = true;
+  }
+  samples[next] = sample;
+  next = (uint8_t)((next + 1U) % BATTERY_AVG_SAMPLES);
 
-  //batteryLevelmV /= AVERAGEL;
-
-
-
-  batteryLevel = batteryLevelmV >> 7; //(((uint32_t)(batteryLevelmV - VDD_MIN) * LORAWAN_MAX_BAT) / (VDD_BAT - VDD_MIN));
+  for (uint8_t k = 0; k < BATTERY_AVG_SAMPLES; k++)
+  {
+    sum += samples[k];
+  }
+  batteryLevel = (uint8_t)(sum >> 7);
   /* USER CODE END GetBatteryLevel_2 */
 
   return batteryLevel;  /* 1 (very low) to 254 (fully charged) */

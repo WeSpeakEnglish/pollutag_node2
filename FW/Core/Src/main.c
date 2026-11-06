@@ -27,8 +27,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
-#include "sen5x_i2c.h"
+#include "app_sensor.h"
+#include "lora_app.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,26 +49,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
-uint8_t receivedFlag = 1;
-uint16_t PM2_5;
-uint16_t PM1;
-uint16_t PM4;
-uint16_t PM10;
-uint16_t VOC;
-uint8_t LEDON;
-uint16_t MEASURE_PERIOD = 1800; //measure period in seconds
-
-uint8_t extBattery;
-double temperatureA = 0.0;
-double temperatureTX = 0.0;
-float humidity = 0.0;
-uint8_t PM_measure_flag = 1;
-
-uint8_t pmSensStatus = 0x00;
-
-static int counter = 0;
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -79,8 +59,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void MeasurePM_sens(void);
-void MeasureOzone(void);
 /* USER CODE END 0 */
 
 /**
@@ -115,31 +93,22 @@ int main(void)
   MX_SPI2_Init();
   MX_LPTIM1_Init();
   /* USER CODE BEGIN 2 */
+  AppSensor_Init(LoRaWAN_OnMeasurementDone);
 
-  F1_QueueIni(); // init Function queue
-  F2_QueueIni();
+  /* 1 s tick for the measurement cycle:
+   * LSE 32768 Hz / 128 = 256 Hz, ARR = 255 -> compare match every 256 ticks */
+  HAL_LPTIM_TimeOut_Start_IT(&hlptim1, 255, 0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-  //HAL_TIM_Base_Start_IT(&htim16);
-  HAL_LPTIM_TimeOut_Start_IT(&hlptim1,  256, 0);
-
-
   while (1)
   {
-
     /* USER CODE END WHILE */
     MX_LoRaWAN_Process();
 
     /* USER CODE BEGIN 3 */
-
-    F1_pull()();
-
   }
-
-
   /* USER CODE END 3 */
 }
 
@@ -191,93 +160,16 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-void EnablePM_sens(void){
-    unsigned char serial_number[32];
-    uint8_t serial_number_size = 32;
-
-
-    sen5x_device_reset();
-    sen5x_get_serial_number(serial_number, serial_number_size);
-
-
-    unsigned char product_name[32];
-    uint8_t product_name_size = 32;
-    sen5x_get_product_name(product_name, product_name_size);
-    sen5x_start_measurement();
-
-}
-
-void DisablePM_sens(void){
-
-sen5x_stop_measurement();
-}
-
-void MeasurePM_sens(void){
-    int16_t a_humidity;
-    int16_t a_temperature;
-    uint16_t nox_index;
-
-    sen5x_read_measured_values(
-        &PM1, &PM2_5,
-		&PM4, &PM10,
-        &a_humidity, &a_temperature, &VOC, &nox_index);
-
-    temperatureA = (double)a_temperature/200.0; //do not know why, but this variable will be affected
-    temperatureTX = temperatureA;
-    humidity = a_humidity/100.0f;
-}
-
-
-#define V_TRESHOLD 143
-
- void HAL_LPTIM_CompareMatchCallback(LPTIM_HandleTypeDef *hlptim)
+/**
+  * @brief LPTIM1 compare match: 1 s tick for the sensor measurement cycle
+  */
+void HAL_LPTIM_CompareMatchCallback(LPTIM_HandleTypeDef *hlptim)
 {
-
-	static char first_start = 1;
-
-
-   if (hlptim == &hlptim1)
-   {
-      switch(counter){
-      case 0:
-    	  if(first_start){
-    		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-    		  first_start = 0;
-    	  }
-    	  else{
-    		  if(extBattery > V_TRESHOLD)
-    		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-    	  }
-    	  break;
-      case 1:
-    		  F1_push(EnablePM_sens);
-    	  break;
-      case 59:
-    		  F1_push(MeasurePM_sens);
-    	  break;
-      case 74:
-    		  F1_push(DisablePM_sens);
-    	  break;
-      case 75:
-    	  	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-    	  break;
-
-      }
-      //HAL_IWDG_Refresh(&hiwdg);
-      if(!MEASURE_PERIOD){
-    	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-    	  return;
-      }
-      counter++;
-      counter %= MEASURE_PERIOD;
-
-      }
-
-
+  if (hlptim == &hlptim1)
+  {
+    AppSensor_OnSecondTick();
+  }
 }
-
-
 
 /* USER CODE END 4 */
 

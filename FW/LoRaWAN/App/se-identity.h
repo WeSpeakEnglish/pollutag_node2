@@ -89,12 +89,12 @@ extern "C" {
  * End-device IEEE EUI (big endian)
  * When set to 00,00,00,00,00,00,00,00 DevEui is automatically set with a value provided by MCU platform
  */
-#define LORAWAN_DEVICE_EUI                                 60,81,F9,AE,72,BB,6E,19
+#define LORAWAN_DEVICE_EUI                                 00,00,00,00,00,00,00,00
 
 /*!
  * App/Join server IEEE EUI (big endian)
  */
-#define LORAWAN_JOIN_EUI                                   60,81,F9,FD,FF,1A,2E,6B
+#define LORAWAN_JOIN_EUI                                   00,00,00,00,00,00,00,00
 
 /*!
  * Device address on the network (big endian)
@@ -105,12 +105,12 @@ extern "C" {
 /*!
  * Application root key
  */
-#define LORAWAN_APP_KEY                                    C1,C8,5F,97,04,6C,F0,78,23,2C,0E,DA,2A,5E,9C,C9
+#define LORAWAN_APP_KEY                                    00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
 
 /*!
  * Network root key
  */
-#define LORAWAN_NWK_KEY                                    C1,C8,5F,97,04,6C,F0,78,23,2C,0E,DA,2A,5E,9C,C9
+#define LORAWAN_NWK_KEY                                    00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
 
 /*!
  * Forwarding Network session key
@@ -404,7 +404,17 @@ extern "C" {
     .SeNvmDevJoinKey.DevAddrABP = FORMAT8_KEY(LORAWAN_DEVICE_ADDRESS)                                               \
 
 /* USER CODE BEGIN EC */
-
+/* Per-device LoRaWAN credentials (see lorawan_credentials_template.h).
+ * They override the CubeMX-generated values above, so the .ioc keeps zeros. */
+#if __has_include("lorawan_credentials.h")
+#undef LORAWAN_DEVICE_EUI
+#undef LORAWAN_JOIN_EUI
+#undef LORAWAN_APP_KEY
+#undef LORAWAN_NWK_KEY
+#include "lorawan_credentials.h"
+#else
+#error "Missing LoRaWAN/App/lorawan_credentials.h: copy lorawan_credentials_template.h to lorawan_credentials.h and enter the keys of your device"
+#endif
 /* USER CODE END EC */
 
 #ifdef __cplusplus

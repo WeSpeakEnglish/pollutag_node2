@@ -1,0 +1,9 @@
+# Build output
+Debug/
+Release/
+
+# Per-device LoRaWAN keys (secret), see README "LoRaWAN credentials"
+LoRaWAN/App/lorawan_credentials.h
+
+# Local backups made during the code review
+_orig_before_fix/
