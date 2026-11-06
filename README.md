@@ -101,7 +101,7 @@ Decoder for payload on server side (uplink):
 
 ## Open and build
 1. Install STM32CubeIDE (the `.ioc` was saved with STM32CubeMX 6.15, firmware package STM32Cube FW_WL V1.3.1).
-2. *File > Import > General > Existing Projects into Workspace*, select this folder. The project is called `pollutag_node2`.
+2. *File > Import > General > Existing Projects into Workspace*, select the `FW` folder. The project is called `pollutag_node2`.
 3. Build: *Debug* (no optimisation, for debugging) or *Release* (optimised, for deployment).
    All sources, include paths and the linker script are relative to the project folder, so no setup is needed.
 4. Flash / debug with the `pollutag_node2` launch configuration (ST-LINK, connect under reset).
@@ -110,7 +110,7 @@ Notes:
 - The firmware package FW_WL V1.3.1 is only needed to regenerate code from the `.ioc`; building works without it.
 - Application code lives in `FW/Core/Src/app_sensor.c` (sensor and measurement cycle) and `FW/LoRaWAN/App/lora_app.c`
   (uplink payload, downlinks), inside the CubeMX `USER CODE` sections so regenerating keeps it.
-- The last 4 KB of flash (0x0803F000) hold the LoRaWAN session and are reserved in `STM32WLE5JCIX_FLASH.ld`.
+- The last 4 KB of flash (0x0803F000) hold the LoRaWAN session and are reserved in `FW/STM32WLE5JCIX_FLASH.ld`.
 - Enter the LoRaWAN credentials of your device in `FW/LoRaWAN/App/lorawan_credentials.h` before building, see [LoRaWAN credentials](#lorawan-credentials).
 
 ## Preparation
@@ -127,7 +127,7 @@ After completing this process, the chip should be successfully cleaned.
 
 ## LoRaWAN credentials
 The keys are **not** taken from the `.ioc` (it keeps zeros). Each device has its own small file
-`LoRaWAN/App/lorawan_credentials.h`, which overrides the CubeMX values and survives code regeneration:
+`FW/LoRaWAN/App/lorawan_credentials.h`, which overrides the CubeMX values and survives code regeneration:
 
 ```c
 #define LORAWAN_DEVICE_EUI    00,00,00,00,00,00,00,00                          // 8 bytes
@@ -151,7 +151,7 @@ Options:
   before erasing the chip).
 
 `lorawan_credentials.h` is device specific and secret: do not share or commit it (it is listed in
-`.gitignore`); share `lorawan_credentials_template.h` instead.
+`FW/.gitignore`); share `lorawan_credentials_template.h` instead.
 
 Hackaday project: [LINK](https://hackaday.io/project/198348-pollutagnode2-air-quality-monitor-lorawan)
 
